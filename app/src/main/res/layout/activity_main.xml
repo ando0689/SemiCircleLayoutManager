@@ -4,13 +4,18 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/blue"
     tools:context="com.example.anna.simplelayoutmanager.MainActivity">
+
+    <com.example.anna.simplelayoutmanager.MyView
+        android:id="@+id/circle_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/text_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/blue">
+        android:layout_height="match_parent">
     </android.support.v7.widget.RecyclerView>
 
 

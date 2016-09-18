@@ -1,6 +1,5 @@
 package com.example.anna.simplelayoutmanager;
 
-import android.graphics.Point;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -12,8 +11,8 @@ import java.util.List;
 
 public class PointsGenerator {
 
-    public static List<Point> generatePoints(int x0, int y0, int radius){
-        List<Point> points = new ArrayList<>();
+    public static List<MyPoint> generatePoints(int x0, int y0, int radius){
+        List<MyPoint> points = new ArrayList<>();
 
         int x = radius;
         int y = 0;
@@ -21,10 +20,10 @@ public class PointsGenerator {
 
         while (x >= y) {
 
-            points.add(new Point(x0 - y, y0 + x));
-            points.add(new Point(x0 - x, y0 + y));
-            points.add(new Point(x0 - x, y0 - y));
-            points.add(new Point(x0 - y, y0 - x));
+            points.add(new MyPoint(x0 - y, y0 + x));
+            points.add(new MyPoint(x0 - x, y0 + y));
+            points.add(new MyPoint(x0 - x, y0 - y));
+            points.add(new MyPoint(x0 - y, y0 - x));
 
             y += 1;
             err += 1 + 2 * y;
@@ -34,7 +33,7 @@ public class PointsGenerator {
             }
         }
 
-        List<Point> newPoint = new ArrayList<>();
+        List<MyPoint> newPoint = new ArrayList<>();
 
         log("******************************************** loop 1 ********************************************");
         for (int i = 3; i < points.size(); i+=4){
