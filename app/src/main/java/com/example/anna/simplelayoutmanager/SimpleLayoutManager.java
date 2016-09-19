@@ -55,18 +55,6 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
         return true;
     }
 
-//    @Override
-//    public boolean canScrollHorizontally() {
-//        return true;
-//    }
-//
-//    @Override
-//    public int scrollHorizontallyBy(int dx, RecyclerView.Recycler recycler, RecyclerView.State state) {
-//        offsetChildrenHorizontal(-dx);
-//
-//        return dx;
-//    }
-
     @Override
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
         scrollViews(-dy);
@@ -82,7 +70,7 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
         if (getChildCount() == 0) { //First or empty layout
             //Scrap measure one child
             View scrap = recycler.getViewForPosition(0);
-            addView(scrap);
+            addView(scrap); // Why add view if we only need to get its width and height????????????
             measureChildWithMargins(scrap, 0, 0);
 
             mDecoratedChildWidth = getDecoratedMeasuredWidth(scrap);
@@ -93,25 +81,26 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
     }
 
     /* Adding points from start and end of the points array which will be out of screen because we need to move center of view out of screen */
+    // Isn't there any better solution to this??????????
     private void addMissingPoints(){
         final ArrayList<MyPoint> newPoints = new ArrayList<>();
 
-        int missingPointsCount = (mDecoratedChildWidth / 2);
+        int missingPointsCount = (mDecoratedChildWidth / 2); // Why?????
 
         final MyPoint firstPoint = mPoints.get(0);
         final MyPoint lastPoint = mPoints.get(mPoints.size() - 1);
 
         // append points from start
         for (int i = missingPointsCount; i > 0; i--){
-            newPoints.add(new MyPoint(firstPoint.x + i, firstPoint.y));
+            newPoints.add(new MyPoint(firstPoint.x + i, firstPoint.y)); //??????????????
         }
 
         // add existing points
         newPoints.addAll(mPoints);
 
         // append points from end
-        for (int i = 1; i < missingPointsCount * 2; i++){
-            newPoints.add(new MyPoint(lastPoint.x + i, lastPoint.y));
+        for (int i = 1; i < missingPointsCount; i++){
+            newPoints.add(new MyPoint(lastPoint.x + i, lastPoint.y)); //????????????????????
         }
 
         mPoints = newPoints;
@@ -282,7 +271,7 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
 //            pos = getItemCount() - 1;
 //        }
 
-        int viewRight = anchorRight;
+        int viewRight = anchorRight; // Why is not used?????????????????????????????????????????????
 
         ViewData previousViewData = new ViewData(0, 0, 0, 0, 0, mPoints.get(0));
 
@@ -297,14 +286,14 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
                 measureChildWithMargins(view, 0, 0);
 
                 indexOfViewPoint = doLayoutUp(view, previousViewData, dy);
-                previousViewData.updateData(view, indexOfViewPoint, mPoints.get(indexOfViewPoint));
+                previousViewData.updateData(view, indexOfViewPoint, mPoints.get(indexOfViewPoint)); // What is this here? indexOfViewPoint
             } else {
                 attachView(view);
                 viewCache.remove(pos);
             }
 
             viewRight = getDecoratedRight(view); // If we assert this pos >= 0, Why we need this line????
-            fillUp = (viewRight < mPoints.get(0).x);
+            fillUp = (viewRight < mPoints.get(0).x); //???????????????????????????????????????????
             pos--;
 //            if (pos < 0){
 //                pos = getItemCount() - 1;
@@ -314,23 +303,23 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
 
     private void circleFillDown(@Nullable View anchorView, RecyclerView.Recycler recycler, int dy){
         int anchorPos = 0;
-        int anchorLeft = 0;
+        int anchorRight = 0;
 
         if (anchorView != null){
             anchorPos = getPosition(anchorView);
-            anchorLeft = getDecoratedLeft(anchorView);
+            anchorRight = getDecoratedRight(anchorView);
         }
 
         int pos = anchorPos;
         boolean fillDown = true;
         int width = getWidth();
-        int viewLeft = anchorLeft;
+        int viewRight = anchorRight;
         int itemCount = getItemCount();
 
         ViewData previousViewData = new ViewData(0, 0, 0, 0, 0, mPoints.get(0));
 
         while (fillDown && pos < itemCount){
-            log("circleFillDown - anchorPos = " + anchorPos);
+            log("circleFillDown - anchorPos = " + anchorPos + ", pos = " + pos);
             View view = viewCache.get(pos);
 
             int indexOfViewPoint = 0;
@@ -340,16 +329,16 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
                 addView(view);
                 measureChildWithMargins(view, 0, 0);
 
-                indexOfViewPoint = doLayoutDown(view, previousViewData, dy);
+                indexOfViewPoint = doLayoutDown(view, previousViewData, dy); //???????????????????????
                 previousViewData.updateData(view, indexOfViewPoint, mPoints.get(indexOfViewPoint));
             } else {
                 attachView(view);
                 viewCache.remove(pos);
             }
 
-            viewLeft = getDecoratedLeft(view);
-            log("circleFillDown - viewLeft = " + viewLeft + ", width = " + width);
-            fillDown = viewLeft <= width;
+            viewRight = getDecoratedRight(view);
+            log("circleFillDown - viewRight = " + viewRight + ", width = " + width);
+            fillDown = viewRight <= width;
 
             pos++;
 
@@ -381,11 +370,11 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
         return indexOfNexViewPoint;
     }
 
-    private int doLayoutDown(View child, ViewData previusViewData, int dy){
-        int indexOfNexViewPoint = findIndexOfNextViewPoint(previusViewData);
+    private int doLayoutDown(View child, ViewData previousViewData, int dy){
+        int indexOfNextViewPoint = findIndexOfNextViewPoint(previousViewData);
 
-        if(indexOfNexViewPoint > previusViewData.getPointIndex()) {
-            MyPoint point = mPoints.get(indexOfNexViewPoint);
+        if(indexOfNextViewPoint > previousViewData.getPointIndex()) {
+            MyPoint point = mPoints.get(indexOfNextViewPoint);
 
             final int newLeft = point.x - (mDecoratedChildWidth / 2);
             final int newTop = point.y - (mDecoratedChildHeight / 2);
@@ -397,7 +386,7 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
             layoutDecorated(child, newLeft, newTop, newRight, newBottom);
         }
 
-        return indexOfNexViewPoint;
+        return indexOfNextViewPoint;
     }
 
 
@@ -407,8 +396,8 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
         for (int i = previousVideData.getPointIndex(); i < mPoints.size(); i++){
             MyPoint p = mPoints.get(i);
 
-            boolean havePlaceX = i < mPoints.size() / 2 ? p.x > previousPoint.x - mDecoratedChildWidth : p.x < previousPoint.x + mDecoratedChildWidth;
-            boolean havePlaceY = p.y < previousPoint.y + mDecoratedChildHeight;
+            boolean havePlaceX = i < mPoints.size() / 2 ? p.x >= previousPoint.x - mDecoratedChildWidth : p.x <= previousPoint.x + mDecoratedChildWidth;
+            boolean havePlaceY = p.y <= previousPoint.y + mDecoratedChildHeight;
 
             if(havePlaceX || havePlaceY){
                 log("found previous index " + i + ", havePlaceX: " + havePlaceX + ", havePlaceY: " + havePlaceY + ", pointX = " + p.x);
@@ -419,14 +408,14 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
         return 0;
     }
 
-    private int findIndexOfNextViewPoint(ViewData previousVideData){
-        MyPoint previousPoint = previousVideData.getCenterPoint();
+    private int findIndexOfNextViewPoint(ViewData previousViewData){
+        MyPoint previousPoint = previousViewData.getCenterPoint();
 
-        for (int i = previousVideData.getPointIndex(); i < mPoints.size(); i++){
+        for (int i = previousViewData.getPointIndex(); i < mPoints.size(); i++){
             MyPoint p = mPoints.get(i);
 
-            boolean havePlaceX = i < mPoints.size() / 2 ? p.x < previousPoint.x - mDecoratedChildWidth : p.x > previousPoint.x + mDecoratedChildWidth;
-            boolean havePlaceY = p.y > previousPoint.y + mDecoratedChildHeight;
+            boolean havePlaceX = i < mPoints.size() / 2 ? p.x <= previousPoint.x - mDecoratedChildWidth : p.x >= previousPoint.x + mDecoratedChildWidth; //?????????????????????????????????????
+            boolean havePlaceY = p.y >= previousPoint.y + mDecoratedChildHeight; //???????????????
 
             if(havePlaceX || havePlaceY){
                 log("found next index " + i + ", havePlaceX: " + havePlaceX + ", havePlaceY: " + havePlaceY + ", pointX = " + p.x);
@@ -452,7 +441,7 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
     }
 
     protected void scrollSingleViewVerticallyBy(View view, int indexOffset) {
-        int viewCenterX = view.getRight() - view.getWidth() / 2 - 1;
+        int viewCenterX = view.getRight() - view.getWidth() / 2;
         int viewCenterY = view.getTop() + view.getHeight() / 2;
         SCROLL_HELPER_POINT.update(viewCenterX, viewCenterY);
 
@@ -481,7 +470,7 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
         int lastIndex = mPoints.size() - 1;
         int correctedIndex;
         if(newCalculatedIndex < 0){
-            correctedIndex = lastIndex + newCalculatedIndex;
+            correctedIndex = lastIndex + newCalculatedIndex; //????????????????????????????????
         } else {
             correctedIndex = newCalculatedIndex > lastIndex ?
                     newCalculatedIndex - lastIndex :
