@@ -8,6 +8,7 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,9 +20,6 @@ import java.util.List;
 
 public class SimpleLayoutManager extends RecyclerView.LayoutManager {
 
-    private static final int DIRECTION_UP = 0;
-    private static final int DIRECTION_DOWN = 1;
-
     private int mDecoratedChildWidth;
     private int mDecoratedChildHeight;
 
@@ -29,7 +27,6 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
 
     private List<MyPoint> mPoints;
     private HashMap<MyPoint, Integer> pointToIndexMap;
-    private HashMap<Integer, MyPoint> indexToPointMap;
 
     public SimpleLayoutManager(List<MyPoint> points) {
         this.mPoints = points;
@@ -47,7 +44,7 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
         addMissingPoints();
         initMaps();
         detachAndScrapAttachedViews(recycler);
-        circleFill(recycler, 0);
+        circleFill(recycler);
     }
 
     @Override
@@ -55,25 +52,12 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
         return true;
     }
 
-//    @Override
-//    public boolean canScrollHorizontally() {
-//        return true;
-//    }
-//
-//    @Override
-//    public int scrollHorizontallyBy(int dx, RecyclerView.Recycler recycler, RecyclerView.State state) {
-//        offsetChildrenHorizontal(-dx);
-//
-//        return dx;
-//    }
 
     @Override
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
         scrollViews(-dy);
-////
-////        log("\n****************************************************************************\n");
-////
-//        circleFill(recycler, 0);
+
+        circleFill(recycler);
         return dy;
     }
 
@@ -110,7 +94,7 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
         newPoints.addAll(mPoints);
 
         // append points from end
-        for (int i = 1; i < missingPointsCount * 2; i++){
+        for (int i = 1; i < missingPointsCount; i++){
             newPoints.add(new MyPoint(lastPoint.x + i, lastPoint.y));
         }
 
@@ -119,12 +103,10 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
 
     private void initMaps(){
         pointToIndexMap = new HashMap<>();
-        indexToPointMap = new HashMap<>();
 
         for (int i = 0; i < mPoints.size(); i++){
             final MyPoint p = mPoints.get(i);
             pointToIndexMap.put(p, i);
-            indexToPointMap.put(i, p);
         }
     }
 //
@@ -241,7 +223,7 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
 //        }
 //    }
 
-    private void circleFill(RecyclerView.Recycler recycler, int dy){
+    private void circleFill(RecyclerView.Recycler recycler){
         View anchorView = getAnchorView();
         viewCache.clear();
 
@@ -257,8 +239,8 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
             detachView(viewCache.valueAt(i)); // How it can detach Views from cache, not real Views???
         }
 
-        circleFillUp(anchorView, recycler, dy);
-        circleFillDown(anchorView, recycler, dy);
+        circleFillUp(anchorView, recycler);
+        circleFillDown(anchorView, recycler);
 
         //отправляем в корзину всё, что не потребовалось в этом цикле лэйаута
         //эти вьюшки или ушли за экран или не понадобились, потому что соответствующие элементы
@@ -268,9 +250,11 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
         }
     }
 
-    private void circleFillUp(@Nullable View anchorView, RecyclerView.Recycler recycler, int dy){
+    ViewData upPreviousViewData;
+
+    private void circleFillUp(@Nullable View anchorView, RecyclerView.Recycler recycler){
         int anchorPos = 0;
-        int anchorRight = 0;
+        int anchorRight = getWidth();
         if (anchorView != null){
             anchorPos = getPosition(anchorView);
             anchorRight = getDecoratedRight(anchorView);
@@ -278,163 +262,315 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
 
         boolean fillUp = true;
         int pos = anchorPos - 1;
-//        if (pos < 0){
-//            pos = getItemCount() - 1;
-//        }
+
+        if (pos < 0){
+            pos = getItemCount() - 1;
+        }
 
         int viewRight = anchorRight;
 
-        ViewData previousViewData = new ViewData(0, 0, 0, 0, 0, mPoints.get(0));
+        int upIndexOfViewPoint = 0;
+
+//        if(upPreviousViewData == null) {
+            upPreviousViewData = new ViewData(0, 0, 0, 0, mPoints.get(0));
+//        }
 
         while (fillUp && pos >= 0){
             log("circleFillUp - anchorPos = " + anchorPos);
             View view = viewCache.get(pos);
 
-            int indexOfViewPoint = 0;
+
             if (view == null){
                 view = recycler.getViewForPosition(pos);
                 addView(view, 0);
                 measureChildWithMargins(view, 0, 0);
 
-                indexOfViewPoint = doLayoutUp(view, previousViewData, dy);
-                previousViewData.updateData(view, indexOfViewPoint, mPoints.get(indexOfViewPoint));
+                upIndexOfViewPoint = doLayoutUp(view, upPreviousViewData);
+                upPreviousViewData.updateData(view, mPoints.get(upIndexOfViewPoint));
             } else {
                 attachView(view);
                 viewCache.remove(pos);
             }
 
             viewRight = getDecoratedRight(view); // If we assert this pos >= 0, Why we need this line????
-            fillUp = (viewRight < mPoints.get(0).x);
+            fillUp = viewRight <= getWidth();
             pos--;
-//            if (pos < 0){
-//                pos = getItemCount() - 1;
-//            }
+            if (pos < 0 && fillUp){
+                pos = getItemCount() - 1;
+            }
         }
     }
 
-    private void circleFillDown(@Nullable View anchorView, RecyclerView.Recycler recycler, int dy){
+
+    ViewData downPreviousViewData;
+
+    private void circleFillDown(@Nullable View anchorView, RecyclerView.Recycler recycler){
         int anchorPos = 0;
-        int anchorLeft = 0;
+        int anchorRight = getWidth();
 
         if (anchorView != null){
             anchorPos = getPosition(anchorView);
-            anchorLeft = getDecoratedLeft(anchorView);
+            anchorRight = getDecoratedRight(anchorView);
         }
 
         int pos = anchorPos;
         boolean fillDown = true;
-        int width = getWidth();
-        int viewLeft = anchorLeft;
+        int viewRight = anchorRight;
         int itemCount = getItemCount();
 
-        ViewData previousViewData = new ViewData(0, 0, 0, 0, 0, mPoints.get(0));
+        int downIndexOfViewPoint = 0;
+
+//        if(downPreviousViewData == null) {
+            downPreviousViewData = new ViewData(0, 0, 0, 0, mPoints.get(0));
+//        }
 
         while (fillDown && pos < itemCount){
             log("circleFillDown - anchorPos = " + anchorPos);
             View view = viewCache.get(pos);
-
-            int indexOfViewPoint = 0;
 
             if (view == null){
                 view = recycler.getViewForPosition(pos);
                 addView(view);
                 measureChildWithMargins(view, 0, 0);
 
-                indexOfViewPoint = doLayoutDown(view, previousViewData, dy);
-                previousViewData.updateData(view, indexOfViewPoint, mPoints.get(indexOfViewPoint));
+                downIndexOfViewPoint = doLayoutDown(view, downPreviousViewData);
+                downPreviousViewData.updateData(view, mPoints.get(downIndexOfViewPoint));
             } else {
                 attachView(view);
                 viewCache.remove(pos);
             }
 
-            viewLeft = getDecoratedLeft(view);
-            log("circleFillDown - viewLeft = " + viewLeft + ", width = " + width);
-            fillDown = viewLeft <= width;
+            viewRight = getDecoratedRight(view);
+            fillDown = viewRight <= getWidth();
 
-            pos++;
-
-//            if(pos == itemCount -1){
-//                pos = 0;
-//            } else {
-//                pos++;
-//            }
+            if(pos == itemCount -1){
+                pos = 0;
+            } else {
+                pos++;
+            }
         }
     }
 
 
-    private int doLayoutUp(View child, ViewData previusViewData, int dy){
+    private int doLayoutUp(View child, ViewData previusViewData){
         int indexOfNexViewPoint = findIndexOfPreviousViewPoint(previusViewData);
 
-        if(indexOfNexViewPoint < previusViewData.getPointIndex()) {
-            MyPoint point = mPoints.get(indexOfNexViewPoint);
+        MyPoint point = mPoints.get(indexOfNexViewPoint);
 
-            final int newLeft = point.x - (mDecoratedChildWidth / 2);
-            final int newTop = point.y - (mDecoratedChildHeight / 2);
-            final int newRight = newLeft + mDecoratedChildWidth;
-            final int newBottom = newTop + mDecoratedChildHeight;
+        final int newLeft = point.x - (mDecoratedChildWidth / 2);
+        final int newTop = point.y - (mDecoratedChildHeight / 2);
+        final int newRight = newLeft + mDecoratedChildWidth;
+        final int newBottom = newTop + mDecoratedChildHeight;
 
-            log("doLayoutUp point: " + point.toString());
+        log("test123 doLayoutUp point: " + point.toString());
 
-            layoutDecorated(child, newLeft, newTop, newRight, newBottom);
-        }
+        layoutDecorated(child, newLeft, newTop, newRight, newBottom);
 
         return indexOfNexViewPoint;
     }
 
-    private int doLayoutDown(View child, ViewData previusViewData, int dy){
+    private int doLayoutDown(View child, ViewData previusViewData){
         int indexOfNexViewPoint = findIndexOfNextViewPoint(previusViewData);
 
-        if(indexOfNexViewPoint > previusViewData.getPointIndex()) {
-            MyPoint point = mPoints.get(indexOfNexViewPoint);
+        MyPoint point = mPoints.get(indexOfNexViewPoint);
 
-            final int newLeft = point.x - (mDecoratedChildWidth / 2);
-            final int newTop = point.y - (mDecoratedChildHeight / 2);
-            final int newRight = newLeft + mDecoratedChildWidth;
-            final int newBottom = newTop + mDecoratedChildHeight;
+        final int newLeft = point.x - (mDecoratedChildWidth / 2);
+        final int newTop = point.y - (mDecoratedChildHeight / 2);
+        final int newRight = newLeft + mDecoratedChildWidth;
+        final int newBottom = newTop + mDecoratedChildHeight;
 
-            log("doLayoutDown point: " + point.toString());
+        log("test123 doLayoutDown point: " + point.toString());
 
-            layoutDecorated(child, newLeft, newTop, newRight, newBottom);
-        }
+        layoutDecorated(child, newLeft, newTop, newRight, newBottom);
 
         return indexOfNexViewPoint;
     }
 
 
     private int findIndexOfPreviousViewPoint(ViewData previousVideData){
-        MyPoint previousPoint = previousVideData.getCenterPoint();
+//        MyPoint previousPoint = previousVideData.getCenterPoint();
+//
+//        for (int i = previousVideData.getPointIndex(); i < mPoints.size(); i++){
+//            MyPoint p = mPoints.get(i);
+//
+//            boolean havePlaceX = i < mPoints.size() / 2 ? p.x > previousPoint.x - mDecoratedChildWidth : p.x < previousPoint.x + mDecoratedChildWidth;
+//            boolean havePlaceY = p.y < previousPoint.y + mDecoratedChildHeight;
+//
+//            if(havePlaceX || havePlaceY){
+//                log("found previous index " + i + ", havePlaceX: " + havePlaceX + ", havePlaceY: " + havePlaceY + ", pointX = " + p.x);
+//                return i;
+//            }
+//        }
+//
+//
+//        log("findIndexOfPreviousViewPoint = " + previousVideData.getPointIndex());
+//
+//        return 0;
 
-        for (int i = previousVideData.getPointIndex(); i < mPoints.size(); i++){
-            MyPoint p = mPoints.get(i);
-
-            boolean havePlaceX = i < mPoints.size() / 2 ? p.x > previousPoint.x - mDecoratedChildWidth : p.x < previousPoint.x + mDecoratedChildWidth;
-            boolean havePlaceY = p.y < previousPoint.y + mDecoratedChildHeight;
-
-            if(havePlaceX || havePlaceY){
-                log("found previous index " + i + ", havePlaceX: " + havePlaceX + ", havePlaceY: " + havePlaceY + ", pointX = " + p.x);
-                return i;
-            }
-        }
-
-        return 0;
+        MyPoint point = findPreviousViewCenter(previousVideData, mDecoratedChildHeight / 2, mDecoratedChildWidth / 2);
+        return pointToIndexMap.get(point);
     }
 
     private int findIndexOfNextViewPoint(ViewData previousVideData){
-        MyPoint previousPoint = previousVideData.getCenterPoint();
+//        MyPoint previousPoint = previousVideData.getCenterPoint();
+//
+//        for (int i = previousVideData.getPointIndex(); i < mPoints.size(); i++){
+//            MyPoint p = mPoints.get(i);
+//
+//            boolean havePlaceX = i < mPoints.size() / 2 ? p.x < previousPoint.x - mDecoratedChildWidth : p.x > previousPoint.x + mDecoratedChildWidth;
+//            boolean havePlaceY = p.y > previousPoint.y + mDecoratedChildHeight;
+//
+//            if(havePlaceX || havePlaceY){
+//                log("found next index " + i + ", havePlaceX: " + havePlaceX + ", havePlaceY: " + havePlaceY + ", pointX = " + p.x);
+//                return i;
+//            }
+//        }
+//
+//        log("findIndexOfNextViewPoint = " + previousVideData.getPointIndex());
+//
+//        return 0;
 
-        for (int i = previousVideData.getPointIndex(); i < mPoints.size(); i++){
-            MyPoint p = mPoints.get(i);
 
-            boolean havePlaceX = i < mPoints.size() / 2 ? p.x < previousPoint.x - mDecoratedChildWidth : p.x > previousPoint.x + mDecoratedChildWidth;
-            boolean havePlaceY = p.y > previousPoint.y + mDecoratedChildHeight;
+        MyPoint point = findNextViewCenter(previousVideData, mDecoratedChildWidth / 2, mDecoratedChildHeight / 2);
 
-            if(havePlaceX || havePlaceY){
-                log("found next index " + i + ", havePlaceX: " + havePlaceX + ", havePlaceY: " + havePlaceY + ", pointX = " + p.x);
-                return i;
+        return pointToIndexMap.get(point);
+    }
+
+
+    public MyPoint findNextViewCenter(ViewData previousViewData, int nextViewHalfViewWidth, int nextViewHalfViewHeight) {
+
+        MyPoint previousViewCenter = previousViewData.getCenterPoint();
+
+        MyPoint nextViewCenter;
+
+        boolean foundNextViewCenter;
+        do {
+
+            /** 1. */
+            nextViewCenter = getNextViewCenter(previousViewCenter);
+
+            /** 2. */
+            int nextViewTop = nextViewCenter.getY() - nextViewHalfViewHeight;
+            int nextViewBottom = nextViewCenter.getY() + nextViewHalfViewHeight;
+            int nextViewRight = nextViewCenter.getX() + nextViewHalfViewWidth;
+            int nextViewLeft = nextViewCenter.getX() - nextViewHalfViewWidth;
+
+            /** 3. */
+            boolean nextViewTopIsBelowPreviousViewBottom = nextViewTop >= previousViewData.getViewBottom();
+            /** 4. */
+            boolean nextViewBottomIsAbovePreviousViewTop = nextViewBottom <= previousViewData.getViewTop();
+            /** 5. */
+            boolean nextViewIsToTheLeftOfThePreviousView = nextViewRight <= previousViewData.getViewLeft();
+
+            boolean nextViewIsToTheRightOfThePreviousView = nextViewLeft >= previousViewData.getViewRight();
+
+            foundNextViewCenter = nextViewTopIsBelowPreviousViewBottom || nextViewIsToTheLeftOfThePreviousView || nextViewBottomIsAbovePreviousViewTop || nextViewIsToTheRightOfThePreviousView;
+
+            if(foundNextViewCenter){
+                log("foundNextViewCenter : nextViewTopIsBelowPreviousViewBottom = " + nextViewTopIsBelowPreviousViewBottom
+                    + ", nextViewBottomIsAbovePreviousViewTop = " + nextViewBottomIsAbovePreviousViewTop
+                    + ", nextViewIsToTheLeftOfThePreviousView = " + nextViewIsToTheLeftOfThePreviousView
+                    + ", nextViewIsToTheRightOfThePreviousView = " + nextViewIsToTheRightOfThePreviousView);
             }
-        }
 
-        return 0;
+            // "next view center" become previous
+            previousViewCenter = nextViewCenter;
+        } while (!foundNextViewCenter);
+
+        return nextViewCenter;
+    }
+
+    /**
+     * We start from previous view center point.
+     * Here is the flow :
+     *
+     * 1. We get an index of previousViewCenter
+     * 2. We increment the index.
+     * 3. Correct received index. We might reach zero of last index
+     * 4. We get next point using index
+     *
+     */
+    private MyPoint getNextViewCenter(MyPoint previousViewCenter) {
+
+        /** 1. */
+        int previousViewCenterPointIndex = pointToIndexMap.get(previousViewCenter);
+
+        log("getNextViewCenter previousViewCenterPointIndex = " + previousViewCenterPointIndex);
+
+        /** 2. */
+        int newIndex = previousViewCenterPointIndex + 1;
+        int lastIndex = pointToIndexMap.size() - 1;
+
+        /** 3. if index is bigger than last index mean we exceeded the the limit and should start from zero. New index should be at the circle points start*/
+        int nextViewCenterPointIndex = newIndex > lastIndex ?
+                newIndex - lastIndex :
+                newIndex;
+
+        /** 4. */
+        MyPoint nextViewCenter = mPoints.get(nextViewCenterPointIndex);
+
+//        if(SHOW_LOGS) Log.v(TAG, "getNextViewCenter, nextViewCenter " + nextViewCenter);
+        return nextViewCenter;
+    }
+
+
+    public MyPoint findPreviousViewCenter(ViewData nextViewData, int previousViewHalfViewHeight, int previousViewHalfViewWidth) {
+
+        MyPoint nextViewCenter = nextViewData.getCenterPoint();
+
+        MyPoint previousViewCenter;
+
+        boolean foundPreviousViewCenter;
+        do {
+            /** 1.*/
+            previousViewCenter = getPreviousViewCenter(nextViewCenter);
+
+            /** 2. */
+            int previousViewTop = previousViewCenter.getY() - previousViewHalfViewHeight;
+            int previousViewBottom = previousViewCenter.getY() + previousViewHalfViewHeight;
+            int previousViewRight = previousViewCenter.getX() + previousViewHalfViewWidth;
+            int previousViewLeft = previousViewCenter.getX() - previousViewHalfViewWidth;
+
+            boolean previousViewTopIsBelowNextViewBottom = previousViewTop > nextViewData.getViewBottom();
+            /** 4. */
+            boolean previousViewBottomIsAboveNextViewTop = previousViewBottom < nextViewData.getViewTop();
+            /** 5. */
+            boolean previousViewIsToTheLeftOfTheNextView = previousViewRight < nextViewData.getViewLeft();
+
+            boolean previousViewIsToTheRightOfTheNextView = previousViewLeft > nextViewData.getViewRight();
+
+            foundPreviousViewCenter = previousViewTopIsBelowNextViewBottom || previousViewBottomIsAboveNextViewTop || previousViewIsToTheLeftOfTheNextView || previousViewIsToTheRightOfTheNextView;
+
+            if(foundPreviousViewCenter){
+                log("foundPreviousViewCenter : previousViewTopIsBelowNextViewBottom = " + previousViewTopIsBelowNextViewBottom
+                        + ", previousViewBottomIsAboveNextViewTop = " + previousViewBottomIsAboveNextViewTop
+                        + ", previousViewIsToTheLeftOfTheNextView = " + previousViewIsToTheLeftOfTheNextView
+                        + ", previousViewIsToTheRightOfTheNextView = " + previousViewIsToTheRightOfTheNextView);
+            }
+
+            // "previous view center" become next
+            nextViewCenter = previousViewCenter;
+        } while (!foundPreviousViewCenter);
+
+        return nextViewCenter;
+    }
+
+    private MyPoint getPreviousViewCenter(MyPoint nextViewCenter) {
+        /** 1. */
+        int nextViewCenterPointIndex = pointToIndexMap.get(nextViewCenter);
+
+        /** 2. */
+        int newIndex = nextViewCenterPointIndex - 1;
+
+        int lastIndex = pointToIndexMap.size() - 1;
+
+        /** 3. */
+        int previousViewCenterPointIndex = newIndex < 0 ?
+                lastIndex + newIndex: // this will subtract newIndex from last index
+                newIndex;
+
+        /** 4. */
+        return mPoints.get(previousViewCenterPointIndex);
     }
 
 
@@ -445,21 +581,28 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
     private final static UpdatablePoint SCROLL_HELPER_POINT = new UpdatablePoint(0, 0);
 
     protected void scrollViews(int delta) {
-        for (int indexOfView = 0; indexOfView < getChildCount(); indexOfView++) {
-            View view = getChildAt(indexOfView);
+        for (int i = 0; i < getChildCount(); i++) {
+            View view = getChildAt(i);
+            TextView tv = (TextView) view.findViewById(R.id.textView);
+
+            int viewCenterX = view.getRight() - view.getWidth() / 2;
+            int viewCenterY = view.getTop() + view.getHeight() / 2;
+            log("test123 - " + tv.getText().toString() + ", x = " + viewCenterX + ", y = " + viewCenterY);
+
             scrollSingleViewVerticallyBy(view, delta);
         }
     }
 
     protected void scrollSingleViewVerticallyBy(View view, int indexOffset) {
-        int viewCenterX = view.getRight() - view.getWidth() / 2 - 1;
+        int viewCenterX = view.getRight() - view.getWidth() / 2;
         int viewCenterY = view.getTop() + view.getHeight() / 2;
-        SCROLL_HELPER_POINT.update(viewCenterX, viewCenterY);
 
-        log("scrollSingleViewVerticallyBy point: " +SCROLL_HELPER_POINT.toString());
+        findPoint(viewCenterX, viewCenterY);
+
+        log("test123 scrollSingleViewVerticallyBy point: " + SCROLL_HELPER_POINT.toString());
 
         if(!pointToIndexMap.containsKey(SCROLL_HELPER_POINT)){
-            log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            log("BAD SCROLL_HELPER_POINT - " + SCROLL_HELPER_POINT.toString());
             return;
         }
 
@@ -467,13 +610,24 @@ public class SimpleLayoutManager extends RecyclerView.LayoutManager {
 
         int newCenterPointIndex = getNewCenterPointIndex(centerPointIndex + indexOffset);
 
-        MyPoint newCenterPoint = indexToPointMap.get(newCenterPointIndex);
+        MyPoint newCenterPoint = mPoints.get(newCenterPointIndex);
 
         int dx = newCenterPoint.x - viewCenterX;
         int dy = newCenterPoint.y - viewCenterY;
 
         view.offsetTopAndBottom(dy);
         view.offsetLeftAndRight(dx);
+    }
+
+    private void findPoint(int viewCenterX, int viewCenterY){
+        for (int i = -1; i < 2; i++){
+            for (int j = -1; j < 2; j++){
+                SCROLL_HELPER_POINT.update(viewCenterX + i, viewCenterY + j);
+                if(pointToIndexMap.containsKey(SCROLL_HELPER_POINT)){
+                    return;
+                }
+            }
+        }
     }
 
     public int getNewCenterPointIndex(int newCalculatedIndex) {

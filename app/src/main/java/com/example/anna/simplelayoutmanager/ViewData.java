@@ -18,30 +18,26 @@ public class ViewData {
     private int mViewLeft;
     private int mViewRight;
 
-    private int mPointIndex;
-
     private boolean mIsViewVisible; // TODO: remove it
     private MyPoint mViewCenter;
 
-    public ViewData(int viewTop, int viewBottom, int viewLeft, int viewRight, int pointIndex, MyPoint viewCenter) {
+    public ViewData(int viewTop, int viewBottom, int viewLeft, int viewRight, MyPoint viewCenter) {
         mViewTop = viewTop;
         mViewBottom = viewBottom;
         mViewLeft = viewLeft;
         mViewRight = viewRight;
-        mPointIndex = pointIndex;
         mViewCenter = viewCenter;
     }
 
 
 
-    public void updateData(View view, int pointIndex, MyPoint viewCenter) {
+    public void updateData(View view, MyPoint viewCenter) {
         mIsViewVisible = view.getLocalVisibleRect(mViewRect);
 
         mViewTop = view.getTop();
         mViewBottom = view.getBottom();
         mViewLeft = view.getLeft();
         mViewRight = view.getRight();
-        mPointIndex = pointIndex;
         mViewCenter = viewCenter;
     }
 
@@ -69,8 +65,8 @@ public class ViewData {
         return mViewTop;
     }
 
-    public int getPointIndex() {
-        return mPointIndex;
+    public int getViewRight() {
+        return mViewRight;
     }
 
     public boolean isViewVisible() {
