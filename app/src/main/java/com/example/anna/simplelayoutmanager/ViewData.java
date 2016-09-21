@@ -3,6 +3,8 @@ package com.example.anna.simplelayoutmanager;
 import android.graphics.Rect;
 import android.view.View;
 
+import com.example.anna.simplelayoutmanager.point.Point;
+
 /**
  * Created by andranik on 9/18/16.
  */
@@ -19,9 +21,9 @@ public class ViewData {
     private int mViewRight;
 
     private boolean mIsViewVisible; // TODO: remove it
-    private MyPoint mViewCenter;
+    private Point mViewCenter;
 
-    public ViewData(int viewTop, int viewBottom, int viewLeft, int viewRight, MyPoint viewCenter) {
+    public ViewData(int viewTop, int viewBottom, int viewLeft, int viewRight, Point viewCenter) {
         mViewTop = viewTop;
         mViewBottom = viewBottom;
         mViewLeft = viewLeft;
@@ -31,7 +33,7 @@ public class ViewData {
 
 
 
-    public void updateData(View view, MyPoint viewCenter) {
+    public void updateData(View view, Point viewCenter) {
         mIsViewVisible = view.getLocalVisibleRect(mViewRect);
 
         mViewTop = view.getTop();
@@ -73,7 +75,7 @@ public class ViewData {
         return mIsViewVisible;
     }
 
-    public MyPoint getCenterPoint() {
+    public Point getCenterPoint() {
         return mViewCenter;
     }
 }

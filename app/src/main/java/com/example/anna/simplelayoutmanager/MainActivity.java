@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 
+import com.example.anna.simplelayoutmanager.scroller.IScrollHandler;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +31,14 @@ public class MainActivity extends AppCompatActivity {
             mTextList.add("" + i);
         }
         mAdapter = new TextAdapter(this, mTextList);
-//       mLayoutManager =  new LinearLayoutManager(this);
-//        mLayoutManager = new StaggeredGridLayoutManager(2, 1);
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                mLayoutManager = new SimpleLayoutManager(myView.getPoints());
+                mLayoutManager = new NewLayoutManager(
+                        myView.getPoints(),
+                        mRecyclerView,
+                        IScrollHandler.Strategy.NATURAL);
                 mRecyclerView.setLayoutManager(mLayoutManager);
                 mRecyclerView.setAdapter(mAdapter);
             }

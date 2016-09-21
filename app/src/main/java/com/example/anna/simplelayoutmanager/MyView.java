@@ -8,6 +8,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
+import com.example.anna.simplelayoutmanager.point.Point;
+
 import java.util.List;
 
 /**
@@ -19,7 +21,7 @@ public class MyView extends View {
 
     private Paint mPaint;
 
-    private List<MyPoint> points;
+    private List<Point> points;
 
     public MyView(Context context) {
         this(context, null);
@@ -52,7 +54,7 @@ public class MyView extends View {
 
     int position = 0;
 
-    public MyPoint getNextPoint(){
+    public Point getNextPoint(){
         return points.get(position++);
     }
 
@@ -62,13 +64,13 @@ public class MyView extends View {
 
         for(int i = 0; i < points.size(); i++) {
 
-            MyPoint p = points.get(i);
-            Log.d("testt", "x = " + p.x + ", y = " + p.y);
-            canvas.drawPoint(p.x, p.y, mPaint);
+            Point p = points.get(i);
+            Log.d("testt", "x = " + p.getX() + ", y = " + p.getY());
+            canvas.drawPoint(p.getX(), p.getY(), mPaint);
         }
     }
 
-    public List<MyPoint> getPoints() {
+    public List<Point> getPoints() {
         return points;
     }
 }
