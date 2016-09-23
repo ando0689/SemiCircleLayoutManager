@@ -2,7 +2,7 @@ package com.example.anna.simplelayoutmanager.scroller;
 
 import android.view.View;
 
-import com.example.anna.simplelayoutmanager.circule.QuadrantHelper;
+import com.example.anna.simplelayoutmanager.circule.CircleHelperInterface;
 import com.example.anna.simplelayoutmanager.layouter.Layouter;
 
 /**
@@ -13,7 +13,7 @@ public class NaturalScrollHandler extends ScrollHandler {
 
     private final ScrollHandlerCallback mCallback;
 
-    public NaturalScrollHandler(ScrollHandlerCallback callback, QuadrantHelper quadrantHelper, Layouter layouter) {
+    public NaturalScrollHandler(ScrollHandlerCallback callback, CircleHelperInterface quadrantHelper, Layouter layouter) {
         super(callback, quadrantHelper, layouter);
         mCallback = callback;
     }

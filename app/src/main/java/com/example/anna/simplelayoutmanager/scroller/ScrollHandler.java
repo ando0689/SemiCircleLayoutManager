@@ -6,10 +6,12 @@ import android.view.View;
 
 import com.example.anna.simplelayoutmanager.Config;
 import com.example.anna.simplelayoutmanager.ViewData;
-import com.example.anna.simplelayoutmanager.circule.QuadrantHelper;
+import com.example.anna.simplelayoutmanager.circule.CircleHelperInterface;
 import com.example.anna.simplelayoutmanager.layouter.Layouter;
 import com.example.anna.simplelayoutmanager.point.Point;
 import com.example.anna.simplelayoutmanager.point.UpdatablePoint;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Created by andranik on 9/21/16.
@@ -21,7 +23,7 @@ public abstract class ScrollHandler implements IScrollHandler{
     private static final String TAG = ScrollHandler.class.getSimpleName();
 
     private final ScrollHandlerCallback mCallback;
-    private final QuadrantHelper mQuadrantHelper;
+    private final CircleHelperInterface mQuadrantHelper;
     private final Layouter mLayouter;
 
     /**
@@ -30,7 +32,7 @@ public abstract class ScrollHandler implements IScrollHandler{
      */
     private final static UpdatablePoint SCROLL_HELPER_POINT = new UpdatablePoint(0, 0);
 
-    ScrollHandler(ScrollHandlerCallback callback, QuadrantHelper quadrantHelper, Layouter layouter) {
+    ScrollHandler(ScrollHandlerCallback callback, CircleHelperInterface quadrantHelper, Layouter layouter) {
         mCallback = callback;
         mQuadrantHelper = quadrantHelper;
         mLayouter = layouter;
@@ -46,6 +48,8 @@ public abstract class ScrollHandler implements IScrollHandler{
     @Override
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler) {
         if (SHOW_LOGS) Log.v(TAG, "scrollVerticallyBy, dy " + dy);
+        long startTime = System.currentTimeMillis();
+
         boolean isFirstItemReached = isFirstItemReached();
         boolean isLastItemReached = isLastItemReached();
 
@@ -66,12 +70,17 @@ public abstract class ScrollHandler implements IScrollHandler{
         /**2. */
         performRecycling(delta, firstView, lastView, recycler);
 
+        long time = System.currentTimeMillis() - startTime;
+
+        Log.d("timetest", "scrollVerticallyBy - " + time);
+
         return -delta;
     }
 
     /**
      * This method calculates new position of single view and returns new center point of first view
      */
+    @DebugLog
     protected Point scrollSingleViewVerticallyBy(View view, int indexOffset) {
         if (SHOW_LOGS) Log.v(TAG, ">> scrollSingleViewVerticallyBy, indexOffset " + indexOffset);
 
@@ -102,6 +111,7 @@ public abstract class ScrollHandler implements IScrollHandler{
 
      * @param delta - indicator of scroll direction
      */
+    @DebugLog
     private void performRecycling(int delta, View firstView, View lastView, RecyclerView.Recycler recycler) {
         if (SHOW_LOGS) Log.v(TAG, ">> performRecycling, delta " + delta);
 
@@ -118,6 +128,8 @@ public abstract class ScrollHandler implements IScrollHandler{
     }
 
     private void addTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
+        long startTime = System.currentTimeMillis();
+
         int rightOffset = mQuadrantHelper.getOffset(mCallback.getWidth(), firstView);
         if (SHOW_LOGS) Log.v(TAG, "addTopIfNeeded, rightOffset " + rightOffset);
 
@@ -150,14 +162,14 @@ public abstract class ScrollHandler implements IScrollHandler{
                 // this is first view there is no views to add to the top
             }
         }
+
+        long time = System.currentTimeMillis() - startTime;
+
+        Log.d("timetest", "addTopIfNeeded - " + time);
     }
 
     private void recycleBottomIfNeeded(View lastView, RecyclerView.Recycler recycler) {
-        /**
-         * Scroll up. Finger is pulling down
-         * This mean that view that goes to bottom-left direction might hide.
-         * If view is hidden we will recycle it
-         */
+        long startTime = System.currentTimeMillis();
 
         int recyclerViewWidth = mCallback.getWidth();
         if (SHOW_LOGS) Log.v(TAG, "recycleBottomIfNeeded recyclerViewWidth " + recyclerViewWidth);
@@ -191,9 +203,15 @@ public abstract class ScrollHandler implements IScrollHandler{
             mCallback.decrementLastVisiblePosition();
             recycler.recycleView(lastView);
         }
+
+        long time = System.currentTimeMillis() - startTime;
+
+        Log.d("timetest", "recycleBottomIfNeeded - " + time);
     }
 
     private void addToBottomIfNeeded(View lastView, RecyclerView.Recycler recycler) {
+        long startTime = System.currentTimeMillis();
+
         // now we should fill extra gap on the bottom if there is one
         int rightOffset = mQuadrantHelper.getOffset(mCallback.getWidth(), lastView);
         if (SHOW_LOGS){
@@ -231,14 +249,14 @@ public abstract class ScrollHandler implements IScrollHandler{
                 // last view is the last item. Do nothing
             }
         }
+
+        long time = System.currentTimeMillis() - startTime;
+
+        Log.d("timetest", "addToBottomIfNeeded - " + time);
     }
 
     private void recycleTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
-        /**
-         * Scroll down. Finger is pulling up
-         * This mean that view that goes to up-right direction might hide.
-         * If view is hidden we will recycle it
-         */
+        long startTime = System.currentTimeMillis();
 
         int recyclerViewWidth = mCallback.getWidth();
         if (SHOW_LOGS) Log.v(TAG, "recycleTopIfNeeded recyclerViewWidth " + recyclerViewWidth);
@@ -260,6 +278,10 @@ public abstract class ScrollHandler implements IScrollHandler{
             mCallback.incrementFirstVisiblePosition();
             recycler.recycleView(firstView);
         }
+
+        long time = System.currentTimeMillis() - startTime;
+
+        Log.d("timetest", "recycleTopIfNeeded - " + time);
     }
 
     private boolean isLastItemReached() {
@@ -277,4 +299,5 @@ public abstract class ScrollHandler implements IScrollHandler{
         if (SHOW_LOGS) Log.v(TAG, "isFirstItemReached, " + isFirstItemReached);
         return isFirstItemReached;
     }
+
 }

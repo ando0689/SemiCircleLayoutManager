@@ -5,7 +5,7 @@ import android.view.View;
 
 import com.example.anna.simplelayoutmanager.Config;
 import com.example.anna.simplelayoutmanager.ViewData;
-import com.example.anna.simplelayoutmanager.circule.QuadrantHelper;
+import com.example.anna.simplelayoutmanager.circule.CircleHelperInterface;
 import com.example.anna.simplelayoutmanager.layouter.Layouter;
 import com.example.anna.simplelayoutmanager.point.Point;
 import com.example.anna.simplelayoutmanager.point.UpdatablePoint;
@@ -20,7 +20,7 @@ public class PixelPerfectScrollHandler extends ScrollHandler {
     private static final String TAG = PixelPerfectScrollHandler.class.getSimpleName();
 
     private final ScrollHandlerCallback mCallback;
-    private final QuadrantHelper mQuadrantHelper;
+    private final CircleHelperInterface mQuadrantHelper;
     private final Layouter mLayouter;
 
     /**
@@ -29,7 +29,7 @@ public class PixelPerfectScrollHandler extends ScrollHandler {
      */
     private final static UpdatablePoint SCROLL_HELPER_POINT = new UpdatablePoint(0, 0);
 
-    PixelPerfectScrollHandler(ScrollHandlerCallback callback, QuadrantHelper quadrantHelper, Layouter layouter) {
+    PixelPerfectScrollHandler(ScrollHandlerCallback callback, CircleHelperInterface quadrantHelper, Layouter layouter) {
         super(callback, quadrantHelper, layouter);
         mCallback = callback;
         mQuadrantHelper = quadrantHelper;

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 import com.example.anna.simplelayoutmanager.scroller.IScrollHandler;
 
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
                         IScrollHandler.Strategy.NATURAL);
                 mRecyclerView.setLayoutManager(mLayoutManager);
                 mRecyclerView.setAdapter(mAdapter);
+                myView.setVisibility(View.GONE);
             }
         }, 1000);
 

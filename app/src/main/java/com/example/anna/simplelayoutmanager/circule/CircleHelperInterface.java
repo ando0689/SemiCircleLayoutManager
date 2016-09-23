@@ -9,7 +9,7 @@ import com.example.anna.simplelayoutmanager.point.Point;
  * Created by andranik on 9/21/16.
  */
 
-public interface QuadrantHelper {
+public interface CircleHelperInterface {
     Point findNextViewCenter(ViewData previousViewData, int nextViewHalfViewWidth, int nextViewHalfViewHeight);
 
     int getViewCenterPointIndex(Point point);
@@ -17,8 +17,6 @@ public interface QuadrantHelper {
     Point getViewCenterPoint(int newCenterPointIndex);
 
     int getNewCenterPointIndex(int newCalculatedIndex);
-
-//    Point findPreviousViewCenter(ViewData nextViewData, int previousViewHalfViewHeight);
 
     Point findPreviousViewCenter(ViewData nextViewData, int previousViewHalfViewHeight, int previousViewHalfViewWidth);
 

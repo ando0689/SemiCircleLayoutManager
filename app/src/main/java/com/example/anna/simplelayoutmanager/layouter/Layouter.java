@@ -6,7 +6,7 @@ import android.view.View;
 
 import com.example.anna.simplelayoutmanager.Config;
 import com.example.anna.simplelayoutmanager.ViewData;
-import com.example.anna.simplelayoutmanager.circule.QuadrantHelper;
+import com.example.anna.simplelayoutmanager.circule.CircleHelperInterface;
 import com.example.anna.simplelayoutmanager.point.Point;
 
 /**
@@ -19,9 +19,9 @@ public class Layouter {
 
     private final LayouterCallback mCallback;
 
-    private final QuadrantHelper mQuadrantHelper;
+    private final CircleHelperInterface mQuadrantHelper;
 
-    public Layouter(LayouterCallback callback, QuadrantHelper quadrantHelper){
+    public Layouter(LayouterCallback callback, CircleHelperInterface quadrantHelper){
         mCallback = callback;
         mQuadrantHelper = quadrantHelper;
     }

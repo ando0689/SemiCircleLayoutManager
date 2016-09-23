@@ -2,7 +2,7 @@ package com.example.anna.simplelayoutmanager.scroller;
 
 import android.support.v7.widget.RecyclerView;
 
-import com.example.anna.simplelayoutmanager.circule.QuadrantHelper;
+import com.example.anna.simplelayoutmanager.circule.CircleHelperInterface;
 import com.example.anna.simplelayoutmanager.layouter.Layouter;
 
 /**
@@ -21,7 +21,7 @@ public interface IScrollHandler {
 
         private Factory(){}
 
-        public static IScrollHandler createScrollHandler(Strategy strategy, ScrollHandlerCallback callback, QuadrantHelper quadrantHelper, Layouter layouter){
+        public static IScrollHandler createScrollHandler(Strategy strategy, ScrollHandlerCallback callback, CircleHelperInterface quadrantHelper, Layouter layouter){
             IScrollHandler scrollHandler = null;
             switch (strategy){
                 case PIXEL_PERFECT:

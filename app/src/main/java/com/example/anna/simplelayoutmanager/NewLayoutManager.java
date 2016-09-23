@@ -6,8 +6,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 
-import com.example.anna.simplelayoutmanager.circule.FirstQuadrantHelper;
-import com.example.anna.simplelayoutmanager.circule.QuadrantHelper;
+import com.example.anna.simplelayoutmanager.circule.CircleHelper;
+import com.example.anna.simplelayoutmanager.circule.CircleHelperInterface;
 import com.example.anna.simplelayoutmanager.layouter.Layouter;
 import com.example.anna.simplelayoutmanager.layouter.LayouterCallback;
 import com.example.anna.simplelayoutmanager.point.Point;
@@ -15,6 +15,8 @@ import com.example.anna.simplelayoutmanager.scroller.IScrollHandler;
 import com.example.anna.simplelayoutmanager.scroller.ScrollHandlerCallback;
 
 import java.util.List;
+
+import hugo.weaving.DebugLog;
 
 /**
  * Created by andranik on 9/21/16.
@@ -33,7 +35,7 @@ public class NewLayoutManager extends RecyclerView.LayoutManager implements Layo
     private final Layouter mLayouter;
 
     private final IScrollHandler mScroller;
-    private final QuadrantHelper mQuadrantHelper;
+    private final CircleHelperInterface mQuadrantHelper;
 
     /**
      * This is a helper value. We should always return "true" from {@link #canScrollVertically()} but we need to change this value to false when measuring a child view size.
@@ -52,11 +54,13 @@ public class NewLayoutManager extends RecyclerView.LayoutManager implements Layo
     private int mDecoratedChildWidth;
     private int mDecoratedChildHeight;
 
-    public NewLayoutManager(List<Point> points, RecyclerView recyclerView, IScrollHandler.Strategy scrollStrategy) {
+    private List<Point> mPoints;
 
+    public NewLayoutManager(List<Point> points, RecyclerView recyclerView, IScrollHandler.Strategy scrollStrategy) {
+        mPoints = points;
         mRecyclerView = recyclerView;
 
-        mQuadrantHelper = new FirstQuadrantHelper(points, POINTS_TO_ADD_COUNT);
+        mQuadrantHelper = new CircleHelper(points, POINTS_TO_ADD_COUNT);
 
         mLayouter = new Layouter(this, mQuadrantHelper);
         mScroller = IScrollHandler.Factory.createScrollHandler(
@@ -79,8 +83,6 @@ public class NewLayoutManager extends RecyclerView.LayoutManager implements Layo
 
         int measuredWidth = getDecoratedMeasuredWidth(view);
         int measuredHeight = getDecoratedMeasuredHeight(view);
-
-        Log.d("testt", "measuredWidth = " + measuredWidth);
 
         if (SHOW_LOGS)
             Log.i(TAG, "getHalfWidthHeightPair, measuredWidth " + measuredWidth + ", measuredHeight " + measuredHeight);
@@ -120,8 +122,9 @@ public class NewLayoutManager extends RecyclerView.LayoutManager implements Layo
         return false;
     }
 
-    @Override
+    @Override @DebugLog
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
+
         if(SHOW_LOGS) Log.v(TAG, "scrollVerticallyBy dy " + dy);
         int childCount = getChildCount();
         if(SHOW_LOGS) Log.v(TAG, "scrollVerticallyBy childCount " + childCount);
@@ -149,7 +152,7 @@ public class NewLayoutManager extends RecyclerView.LayoutManager implements Layo
         }
     }
 
-    @Override
+    @Override @DebugLog
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         if(SHOW_LOGS) Log.v(TAG, ">> onLayoutChildren, state " + state);
 
