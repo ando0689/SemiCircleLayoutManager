@@ -1,18 +1,15 @@
-package com.example.anna.simplelayoutmanager.circule;
+package am.andranik.semicirclelayoutmanger.circle;
 
 import android.util.Log;
 import android.view.View;
-
-import com.example.anna.simplelayoutmanager.Config;
-import com.example.anna.simplelayoutmanager.ViewData;
-import com.example.anna.simplelayoutmanager.point.Point;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import hugo.weaving.DebugLog;
+import am.andranik.semicirclelayoutmanger.point.Point;
+import am.andranik.semicirclelayoutmanger.utils.Config;
+import am.andranik.semicirclelayoutmanger.utils.ViewData;
 
 /**
  * Created by andranik on 9/21/16.
@@ -102,7 +99,7 @@ public class CircleHelper implements CircleHelperInterface {
         return mPoints.get(previousViewCenterPointIndex);
     }
 
-    @Override @DebugLog
+    @Override
     public Point findNextViewCenter(ViewData previousViewData, int nextViewHalfViewWidth, int nextViewHalfViewHeight) {
 
         Point previousViewCenter = previousViewData.getCenterPoint();
@@ -133,13 +130,6 @@ public class CircleHelper implements CircleHelperInterface {
                     || nextViewBottomIsAbovePreviousViewTop
                     || nextViewIsToTheRightOfThePreviousView;
 
-
-            Log.d("testt1", "findNextViewCenter: "
-                    + " \nnextViewTopIsBelowPreviousViewBottom = " + nextViewTopIsBelowPreviousViewBottom
-                    + " \nnextViewBottomIsAbovePreviousViewTop = " + nextViewBottomIsAbovePreviousViewTop
-                    + " \nnextViewIsToTheLeftOfThePreviousView = " + nextViewIsToTheLeftOfThePreviousView
-                    + " \nnextViewIsToTheRightOfThePreviousView = " + nextViewIsToTheRightOfThePreviousView);
-
             // "next view center" become previous
             previousViewCenter = nextViewCenter;
         } while (!foundNextViewCenter);
@@ -147,7 +137,7 @@ public class CircleHelper implements CircleHelperInterface {
         return nextViewCenter;
     }
 
-    @Override @DebugLog
+    @Override
     public Point findPreviousViewCenter(ViewData nextViewData, int previousViewHalfViewHeight, int previousViewHalfViewWidth) {
 
         Point nextViewCenter = nextViewData.getCenterPoint();
@@ -173,17 +163,10 @@ public class CircleHelper implements CircleHelperInterface {
             boolean previousViewIsToTheRightOfTheNextView = previousViewLeft >= nextViewData.getViewRight();
 
             foundPreviousViewCenter =
-//                    previousViewTopIsBelowNextViewBottom
-//                    || previousViewBottomIsAboveNextViewTop
-//                    || previousViewIsToTheLeftOfTheNextView
-                     previousViewIsToTheRightOfTheNextView;
-
-            if(foundPreviousViewCenter)
-            Log.d("testt1", "findPreviousViewCenter: "
-                    + " \npreviousViewTopIsBelowNextViewBottom = " + previousViewTopIsBelowNextViewBottom
-                    + " \npreviousViewBottomIsAboveNextViewTop = " + previousViewBottomIsAboveNextViewTop
-                    + " \npreviousViewIsToTheLeftOfTheNextView = " + previousViewIsToTheLeftOfTheNextView
-                    + " \npreviousViewIsToTheRightOfTheNextView = " + previousViewIsToTheRightOfTheNextView);
+                    previousViewTopIsBelowNextViewBottom
+                    || previousViewBottomIsAboveNextViewTop
+                    || previousViewIsToTheLeftOfTheNextView
+                    || previousViewIsToTheRightOfTheNextView;
 
             // "previous view center" become next
             nextViewCenter = previousViewCenter;

@@ -1,9 +1,9 @@
-package com.example.anna.simplelayoutmanager.scroller;
+package am.andranik.semicirclelayoutmanger.scroller;
 
 import android.support.v7.widget.RecyclerView;
 
-import com.example.anna.simplelayoutmanager.circule.CircleHelperInterface;
-import com.example.anna.simplelayoutmanager.layouter.Layouter;
+import am.andranik.semicirclelayoutmanger.circle.CircleHelperInterface;
+import am.andranik.semicirclelayoutmanger.layouter.Layouter;
 
 /**
  * Created by andranik on 9/21/16.

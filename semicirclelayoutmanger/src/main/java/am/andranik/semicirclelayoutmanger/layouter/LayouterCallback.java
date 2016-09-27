@@ -1,4 +1,4 @@
-package com.example.anna.simplelayoutmanager.layouter;
+package am.andranik.semicirclelayoutmanger.layouter;
 
 import android.graphics.Rect;
 import android.util.Pair;

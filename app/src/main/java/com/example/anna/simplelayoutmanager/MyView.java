@@ -8,10 +8,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
-import com.example.anna.simplelayoutmanager.point.Point;
-
-import java.util.List;
-
 /**
  * Created by anna on 9/13/16.
  */
@@ -21,7 +17,9 @@ public class MyView extends View {
 
     private Paint mPaint;
 
-    private List<Point> points;
+    private int cx;
+    private int cy;
+    private int radius;
 
     public MyView(Context context) {
         this(context, null);
@@ -36,6 +34,7 @@ public class MyView extends View {
         super(context, attrs, defStyleAttr);
         mPaint = new Paint();
         mPaint.setColor(Color.BLUE);
+        mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setAntiAlias(true);
     }
 
@@ -43,34 +42,16 @@ public class MyView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         Log.d("testt", "onSizeChanged - w = " + w + ", h = " + h);
 
-        int x = w;
-        int y = h/2;
-        int radius = w/2 + 100;
-
-        points = PointsGenerator.generatePoints(x, y, radius);
+        cx = w;
+        cy = h/2;
+        radius = w/2 + 100;
 
         super.onSizeChanged(w, h, oldw, oldh);
     }
 
-    int position = 0;
-
-    public Point getNextPoint(){
-        return points.get(position++);
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
-        Log.d("testt", "onDraw " + position + ", max " + points.size());
-
-        for(int i = 0; i < points.size(); i++) {
-
-            Point p = points.get(i);
-            Log.d("testt", "x = " + p.getX() + ", y = " + p.getY());
-            canvas.drawPoint(p.getX(), p.getY(), mPaint);
-        }
+        canvas.drawCircle(cx, cy, radius, mPaint);
     }
 
-    public List<Point> getPoints() {
-        return points;
-    }
 }

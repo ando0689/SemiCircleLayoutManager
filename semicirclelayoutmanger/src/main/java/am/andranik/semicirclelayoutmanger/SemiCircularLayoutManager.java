@@ -1,4 +1,4 @@
-package com.example.anna.simplelayoutmanager;
+package am.andranik.semicirclelayoutmanger;
 
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
@@ -6,36 +6,37 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 
-import com.example.anna.simplelayoutmanager.circule.CircleHelper;
-import com.example.anna.simplelayoutmanager.circule.CircleHelperInterface;
-import com.example.anna.simplelayoutmanager.layouter.Layouter;
-import com.example.anna.simplelayoutmanager.layouter.LayouterCallback;
-import com.example.anna.simplelayoutmanager.point.Point;
-import com.example.anna.simplelayoutmanager.scroller.IScrollHandler;
-import com.example.anna.simplelayoutmanager.scroller.ScrollHandlerCallback;
-
 import java.util.List;
 
-import hugo.weaving.DebugLog;
+import am.andranik.semicirclelayoutmanger.circle.CircleHelper;
+import am.andranik.semicirclelayoutmanger.circle.CircleHelperInterface;
+import am.andranik.semicirclelayoutmanger.layouter.Layouter;
+import am.andranik.semicirclelayoutmanger.layouter.LayouterCallback;
+import am.andranik.semicirclelayoutmanger.point.Point;
+import am.andranik.semicirclelayoutmanger.point.PointsGenerator;
+import am.andranik.semicirclelayoutmanger.scroller.IScrollHandler;
+import am.andranik.semicirclelayoutmanger.scroller.ScrollHandlerCallback;
+import am.andranik.semicirclelayoutmanger.utils.Config;
+import am.andranik.semicirclelayoutmanger.utils.ViewData;
 
 /**
  * Created by andranik on 9/21/16.
  */
 
-public class NewLayoutManager extends RecyclerView.LayoutManager implements LayouterCallback, ScrollHandlerCallback {
+public class SemiCircularLayoutManager extends RecyclerView.LayoutManager implements LayouterCallback, ScrollHandlerCallback {
 
     public static final int POINTS_TO_ADD_COUNT = 500;
     public static final boolean ENDLESS_SCROLL = true;
 
     private static final boolean SHOW_LOGS = Config.SHOW_LOGS;
-    private static final String TAG = NewLayoutManager.class.getSimpleName();
+    private static final String TAG = SemiCircularLayoutManager.class.getSimpleName();
 
-    private final RecyclerView mRecyclerView;
+    private RecyclerView mRecyclerView;
 
-    private final Layouter mLayouter;
+    private Layouter mLayouter;
 
-    private final IScrollHandler mScroller;
-    private final CircleHelperInterface mQuadrantHelper;
+    private IScrollHandler mScroller;
+    private CircleHelperInterface mQuadrantHelper;
 
     /**
      * This is a helper value. We should always return "true" from {@link #canScrollVertically()} but we need to change this value to false when measuring a child view size.
@@ -51,23 +52,8 @@ public class NewLayoutManager extends RecyclerView.LayoutManager implements Layo
     private int mFirstVisiblePosition = 0; //TODO: implement save/restore state
     private int mLastVisiblePosition = 0; //TODO: implement save/restore state
 
-    private int mDecoratedChildWidth;
-    private int mDecoratedChildHeight;
-
-    private List<Point> mPoints;
-
-    public NewLayoutManager(List<Point> points, RecyclerView recyclerView, IScrollHandler.Strategy scrollStrategy) {
-        mPoints = points;
+    public SemiCircularLayoutManager(RecyclerView recyclerView) {
         mRecyclerView = recyclerView;
-
-        mQuadrantHelper = new CircleHelper(points, POINTS_TO_ADD_COUNT);
-
-        mLayouter = new Layouter(this, mQuadrantHelper);
-        mScroller = IScrollHandler.Factory.createScrollHandler(
-                scrollStrategy,
-                this,
-                mQuadrantHelper,
-                mLayouter);
     }
 
     @Override
@@ -122,7 +108,7 @@ public class NewLayoutManager extends RecyclerView.LayoutManager implements Layo
         return false;
     }
 
-    @Override @DebugLog
+    @Override
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
 
         if(SHOW_LOGS) Log.v(TAG, "scrollVerticallyBy dy " + dy);
@@ -137,24 +123,27 @@ public class NewLayoutManager extends RecyclerView.LayoutManager implements Layo
         return mScroller.scrollVerticallyBy(dy, recycler);
     }
 
-    /* Jus initializes the width and height of the child views */
-    private void initViewSizes(RecyclerView.Recycler recycler){
-        if (getChildCount() == 0) { //First or empty layout
-            //Scrap measure one child
-            View scrap = recycler.getViewForPosition(0);
-            addView(scrap);
-            measureChildWithMargins(scrap, 0, 0);
+    private void initHelpers(){
+        int x = getWidth();
+        int y = getHeight()/2;
+        int radius = x/2 + 100;
 
-            mDecoratedChildWidth = getDecoratedMeasuredWidth(scrap);
-            mDecoratedChildHeight = getDecoratedMeasuredHeight(scrap);
+        List<Point> mPoints = PointsGenerator.generatePoints(x, y, radius);
 
-            detachAndScrapView(scrap, recycler);
-        }
+        mQuadrantHelper = new CircleHelper(mPoints, POINTS_TO_ADD_COUNT);
+
+        mLayouter = new Layouter(this, mQuadrantHelper);
+        mScroller = IScrollHandler.Factory.createScrollHandler(
+                IScrollHandler.Strategy.NATURAL,
+                this,
+                mQuadrantHelper,
+                mLayouter);
     }
 
-    @Override @DebugLog
+    @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         if(SHOW_LOGS) Log.v(TAG, ">> onLayoutChildren, state " + state);
+        initHelpers();
 
         //We have nothing to show for an empty data set but clear any existing views
         int itemCount = getItemCount();
@@ -180,9 +169,8 @@ public class NewLayoutManager extends RecyclerView.LayoutManager implements Layo
 
         if(!firstLayouted){
             firstLayouted = true;
-            initViewSizes(recycler);
             viewData = new ViewData(0, 0, 0, 0,
-                    mQuadrantHelper.getViewCenterPoint(POINTS_TO_ADD_COUNT + mDecoratedChildWidth / 2)
+                    mQuadrantHelper.getViewCenterPoint(POINTS_TO_ADD_COUNT + 1)
             );
         }
 
@@ -206,7 +194,7 @@ public class NewLayoutManager extends RecyclerView.LayoutManager implements Layo
     }
 
     /**
-     * This is a wrapper method for {@link android.support.v7.widget.RecyclerView#measureChildWithMargins(android.view.View, int, int, int, int)}
+     * This is a wrapper method for {@link android.support.v7.widget.RecyclerView#measureChildWithMargins(View, int, int, int, int)}
      *
      * If capsules width is "match_parent" then we we need to return "false" from {@link #canScrollHorizontally()}
      * If capsules height is "match_parent" then we we need to return "false" from {@link #canScrollVertically()}

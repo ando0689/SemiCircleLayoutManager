@@ -1,8 +1,6 @@
-package com.example.anna.simplelayoutmanager;
+package am.andranik.semicirclelayoutmanger.point;
 
 import android.util.Log;
-
-import com.example.anna.simplelayoutmanager.point.Point;
 
 import java.util.ArrayList;
 import java.util.List;

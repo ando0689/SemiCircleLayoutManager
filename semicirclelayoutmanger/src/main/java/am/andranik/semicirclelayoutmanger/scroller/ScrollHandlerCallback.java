@@ -1,4 +1,4 @@
-package com.example.anna.simplelayoutmanager.scroller;
+package am.andranik.semicirclelayoutmanger.scroller;
 
 import android.view.View;
 

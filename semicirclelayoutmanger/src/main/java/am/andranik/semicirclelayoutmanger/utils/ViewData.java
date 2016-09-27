@@ -1,9 +1,9 @@
-package com.example.anna.simplelayoutmanager;
+package am.andranik.semicirclelayoutmanger.utils;
 
 import android.graphics.Rect;
 import android.view.View;
 
-import com.example.anna.simplelayoutmanager.point.Point;
+import am.andranik.semicirclelayoutmanger.point.Point;
 
 /**
  * Created by andranik on 9/18/16.

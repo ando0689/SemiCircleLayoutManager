@@ -1,4 +1,4 @@
-package com.example.anna.simplelayoutmanager.point;
+package am.andranik.semicirclelayoutmanger.point;
 
 /**
  * Created by andranik on 9/21/16.

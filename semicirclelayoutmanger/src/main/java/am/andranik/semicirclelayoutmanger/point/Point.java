@@ -1,14 +1,15 @@
-package com.example.anna.simplelayoutmanager;
+package am.andranik.semicirclelayoutmanger.point;
 
 /**
- * Created by andranik on 9/18/16.
+ * Created by andranik on 9/21/16.
  */
 
-public class MyPoint {
-    public int x;
-    public int y;
+public class Point {
 
-    public MyPoint(int x, int y) {
+    private int x;
+    private int y;
+
+    public Point(int x, int y) {
         this.x = x;
         this.y = y;
     }
@@ -63,10 +64,10 @@ public class MyPoint {
             return false;
         }
 
-        if(!(o instanceof MyPoint)){
+        if(!(o instanceof Point)){
             return false;
         }
-        MyPoint other = (MyPoint) o;
+        Point other = (Point) o;
         return other.x == x && other.y == y;
     }
 

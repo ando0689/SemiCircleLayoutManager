@@ -1,14 +1,14 @@
-package com.example.anna.simplelayoutmanager.scroller;
+package am.andranik.semicirclelayoutmanger.scroller;
 
 import android.util.Log;
 import android.view.View;
 
-import com.example.anna.simplelayoutmanager.Config;
-import com.example.anna.simplelayoutmanager.ViewData;
-import com.example.anna.simplelayoutmanager.circule.CircleHelperInterface;
-import com.example.anna.simplelayoutmanager.layouter.Layouter;
-import com.example.anna.simplelayoutmanager.point.Point;
-import com.example.anna.simplelayoutmanager.point.UpdatablePoint;
+import am.andranik.semicirclelayoutmanger.circle.CircleHelperInterface;
+import am.andranik.semicirclelayoutmanger.layouter.Layouter;
+import am.andranik.semicirclelayoutmanger.point.Point;
+import am.andranik.semicirclelayoutmanger.point.UpdatablePoint;
+import am.andranik.semicirclelayoutmanger.utils.Config;
+import am.andranik.semicirclelayoutmanger.utils.ViewData;
 
 /**
  * Created by andranik on 9/21/16.

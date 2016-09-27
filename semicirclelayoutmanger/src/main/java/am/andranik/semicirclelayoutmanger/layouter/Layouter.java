@@ -1,13 +1,13 @@
-package com.example.anna.simplelayoutmanager.layouter;
+package am.andranik.semicirclelayoutmanger.layouter;
 
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 
-import com.example.anna.simplelayoutmanager.Config;
-import com.example.anna.simplelayoutmanager.ViewData;
-import com.example.anna.simplelayoutmanager.circule.CircleHelperInterface;
-import com.example.anna.simplelayoutmanager.point.Point;
+import am.andranik.semicirclelayoutmanger.circle.CircleHelperInterface;
+import am.andranik.semicirclelayoutmanger.point.Point;
+import am.andranik.semicirclelayoutmanger.utils.Config;
+import am.andranik.semicirclelayoutmanger.utils.ViewData;
 
 /**
  * Created by andranik on 9/21/16.
